@@ -1,1 +1,1 @@
-# auto_torrent
+It use https://github.com/pobrn/mktorrent to create the file and https://github.com/ikatson/rqbit?tab=readme-ov-file as a torrent server to seed.
