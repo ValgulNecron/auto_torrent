@@ -1,1 +1,1 @@
-It use https://github.com/pobrn/mktorrent to create the file and https://github.com/ikatson/rqbit?tab=readme-ov-file as a torrent server to seed.
+It use https://github.com/casey/intermodal to create the file and  as a torrent server to seed.
