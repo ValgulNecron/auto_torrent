@@ -1,4 +1,6 @@
 use std::fs;
+use std::fs::File;
+use std::io::Read;
 use notify::{Watcher, RecursiveMode, Result, Event};
 use std::path::{Path, PathBuf};
 use std::process::Command;
@@ -41,11 +43,13 @@ async fn main() -> Result<(), > {
     let url = opt.url.clone();
     let password = opt.password.clone();
     let username = opt.username.clone();
+    let out2 = opt.output.clone();
     tokio::spawn(async move {
         let entries = fs::read_dir(out).unwrap();
         for entry in entries {
             let entry = entry.unwrap();
             let path = entry.path();
+
             println!("{:?}", path);
             if path.is_file() {
                 send_torrent(&path, &url, &password, &username).await;
@@ -55,9 +59,8 @@ async fn main() -> Result<(), > {
     });
 
     let callback = move |result: Result<Event>| {
-        let mut rt = Runtime::new().unwrap();
         let out = opt.output.clone();
-            handle(out, result);
+        handle(out, result);
     };
     // Parse command line arguments
 
@@ -91,13 +94,20 @@ async fn send_torrent(full_output_path: &PathBuf, url: &String, x: &String, x0: 
     let save_path = "/downloads";
     let url = format!("{}/api/v2/", url);
 
+    let mut file = File::open(torrent_path).unwrap();
+    let mut torrent_data = Vec::new();
+    file.read_to_end(&mut torrent_data).unwrap();
+
     let request_body = json!({
         "jsonrpc": "2.0",
         "id":  1,
         "method": "torrents/add",
         "params": {
-            "urls": [torrent_path],
-            "save_path": save_path
+            "urls": [base64::encode(&torrent_data)],
+            "save_path": "/path/to/save/location", // Replace with the path where you want the torrent to be saved
+            "auto_tmm": false,
+            "sequential_download": false,
+            "first_last_piece_priority": false
         }
     });
 
