@@ -7,7 +7,8 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::time::Duration;
 use structopt::StructOpt;
-use reqwest::{Client, header, multipart};
+use reqwest::{Client, ClientBuilder, header, multipart};
+use reqwest::header::{COOKIE, HeaderMap, HeaderValue};
 use serde_json::json;
 use tokio::runtime::Runtime;
 use tokio::sync::mpsc;
@@ -28,6 +29,10 @@ struct Opt {
     /// The url to the qbittorrent server. default is http://127.0.0.1:8090
     #[structopt(short = "u", long = "url", default_value = "http://127.0.0.1:8090")]
     url: String,
+
+    /// The sid
+    #[structopt(short = "s", long = "sid")]
+    sid: String,
 }
 
 #[tokio::main]
@@ -35,6 +40,7 @@ async fn main() -> Result<(), > {
     let opt = Opt::from_args();
     let out = opt.output.clone();
     let url = opt.url.clone();
+    let sid = opt.sid.clone();
     tokio::spawn(async move {
         loop {
             let entries = fs::read_dir(&out).unwrap();
@@ -44,7 +50,7 @@ async fn main() -> Result<(), > {
 
             println!("{:?}", path);
             if path.is_file() {
-                send_torrent(&path, &url).await;
+                send_torrent(&path, &url,&sid).await;
             }
             println!("done")
         }
@@ -83,13 +89,14 @@ fn torrent(full_output_path: &PathBuf, path: PathBuf) {
     }
 }
 
-async fn send_torrent(full_output_path: &PathBuf, url: &String) {
+async fn send_torrent(full_output_path: &PathBuf, url: &String, sid: &String) {
     let url = format!("{}/api/v2/torrents/add", url);
 
    let output  = Command::new("imdl")
         .arg("torrent")
         .arg("create")
         .arg("--link")
+         .arg("-n")
         .arg(full_output_path)
         .output().unwrap();
 
@@ -99,8 +106,13 @@ async fn send_torrent(full_output_path: &PathBuf, url: &String) {
     let form = reqwest::multipart::Form::new()
         .text("root_folder", "true")
         .text("urls", magnet_url);
-
-    let client = Client::new();
+    let client = Client::builder()
+        .no_proxy()
+        .build()
+        .expect("Failed to build reqwest client");
+    let mut headers = HeaderMap::new();
+    let sid = format!("SID={}", sid);
+    headers.insert(COOKIE, HeaderValue::from_str(&sid).unwrap());
     let response = client.post(url)
         .header(header::CONTENT_TYPE, "multipart/form-data")
         .header(header::REFERER, "https://qbittorrent.valgul.moe/")
