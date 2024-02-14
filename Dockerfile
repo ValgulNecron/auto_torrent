@@ -17,4 +17,4 @@ RUN cargo build -r
 RUN mkdir /in
 RUN mkdir /out
 
-CMD ["/auto_torrent/target/release/auto_torrent -f /in -o /out -u http://qbittorrent:8080"]
+CMD ["/auto_torrent/target/release/auto_torrent", "-f", "/data/in", "-o", "/data/out", "-u", "http://qbittorrent:8080"]
