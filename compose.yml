@@ -20,6 +20,8 @@ services:
   auto_torrent:
     image: valgul/auto_torrent
     container_name: auto_torrent
+    depends_on:
+      - qbittorrent
     volumes:
       - /data/in:/in
       - /data/out:/out
