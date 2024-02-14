@@ -33,7 +33,6 @@ struct Opt {
 #[tokio::main]
 async fn main() -> Result<(), > {
     let opt = Opt::from_args();
-    /*
     let out = opt.output.clone();
     let url = opt.url.clone();
     tokio::spawn(async move {
@@ -52,7 +51,6 @@ async fn main() -> Result<(), > {
             sleep(Duration::from_secs(2)).await
         }
     });
-    */
 
 
     let callback = move |result: Result<Event>| {
@@ -102,8 +100,6 @@ async fn send_torrent(full_output_path: &PathBuf, url: &String) {
         .text("root_folder", "true")
         .text("urls", magnet_url);
 
-
-
     let client = Client::new();
     let response = client.post(url)
         .header(header::CONTENT_TYPE, "multipart/form-data")
@@ -111,7 +107,6 @@ async fn send_torrent(full_output_path: &PathBuf, url: &String) {
         .header(header::ORIGIN, "https://qbittorrent.valgul.moe/")
         .multipart(form)
         .send().await.unwrap();
-
 
     println!("Response: {:?}", response);
 }
