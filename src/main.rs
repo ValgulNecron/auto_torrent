@@ -33,6 +33,7 @@ struct Opt {
 #[tokio::main]
 async fn main() -> Result<(), > {
     let opt = Opt::from_args();
+    /*
     let out = opt.output.clone();
     let url = opt.url.clone();
     tokio::spawn(async move {
@@ -51,6 +52,8 @@ async fn main() -> Result<(), > {
             sleep(Duration::from_secs(2)).await
         }
     });
+    */
+
 
     let callback = move |result: Result<Event>| {
         let out = opt.output.clone();

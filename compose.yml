@@ -1,7 +1,7 @@
 version: '3'
 services:
   qbittorrent:
-    image: lscr.io/linuxserver/qbittorrent:latest
+    image: valgul:qbittorrent
     container_name: qbittorrent
     environment:
       - PUID=1000
@@ -12,6 +12,7 @@ services:
     volumes:
       - /data/config:/config
       - /data/in:/downloads
+      - /data/out:/torrent
     ports:
       - 8080:8080
       - 6881:6881
