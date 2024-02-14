@@ -5,6 +5,7 @@ use std::io::Read;
 use notify::{Watcher, RecursiveMode, Result, Event};
 use std::path::{Path, PathBuf};
 use std::process::Command;
+use std::time::Duration;
 use structopt::StructOpt;
 use reqwest::{Client, header, multipart};
 use serde_json::json;
@@ -35,8 +36,9 @@ async fn main() -> Result<(), > {
     let out = opt.output.clone();
     let url = opt.url.clone();
     tokio::spawn(async move {
-        let entries = fs::read_dir(out).unwrap();
-        for entry in entries {
+        loop {
+            let entries = fs::read_dir(&out).unwrap();
+            for entry in entries {
             let entry = entry.unwrap();
             let path = entry.path();
 
@@ -45,6 +47,8 @@ async fn main() -> Result<(), > {
                 send_torrent(&path, &url).await;
             }
             println!("done")
+        }
+            sleep(Duration::from_secs(2)).await
         }
     });
 
